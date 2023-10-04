@@ -89,7 +89,7 @@ export const OpenAIStream = async (
       const onParse = (event: ParsedEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           const data = event.data;
-
+          if (data !== '[DONE]') {
           try {
             const json = JSON.parse(data);
             if (json.choices[0].finish_reason != null) {
@@ -102,6 +102,7 @@ export const OpenAIStream = async (
           } catch (e) {
             controller.error(e);
           }
+        }
         }
       };
 
