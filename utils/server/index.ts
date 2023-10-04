@@ -103,16 +103,16 @@ export const OpenAIStream = async (
               controller.error(e);
             }
           }
-        } // This closing brace was missing
-
-        const parser = createParser(onParse);
-
-        for await (const chunk of res.body as any) {
-          parser.feed(decoder.decode(chunk));
         }
       };
-      // Start the parser here
+
       const parser = createParser(onParse);
+
+      if (res.body) {
+        for await (const chunk of res.body) {
+          parser.feed(decoder.decode(chunk));
+        }
+      }
     },
   });
 
