@@ -110,8 +110,11 @@ export const OpenAIStream = async (
         for await (const chunk of res.body as any) {
           parser.feed(decoder.decode(chunk));
         }
-      },
-    });
+      };
+      // Start the parser here
+      const parser = createParser(onParse);
+    },
+  });
 
   return stream;
 };
