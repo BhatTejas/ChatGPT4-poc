@@ -90,28 +90,28 @@ export const OpenAIStream = async (
         if (event.type === 'event') {
           const data = event.data;
           if (data !== '[DONE]') {
-          try {
-            const json = JSON.parse(data);
+            try {
+              const json = JSON.parse(data);
               if (json.choices[0].finish_reason != null) {
                 controller.close();
                 return;
               }
-            const text = json.choices[0].delta.content;
-            const queue = encoder.encode(text);
-            controller.enqueue(queue);
-          } catch (e) {
-            controller.error(e);
+              const text = json.choices[0].delta.content;
+              const queue = encoder.encode(text);
+              controller.enqueue(queue);
+            } catch (e) {
+              controller.error(e);
+            }
           }
+        } // This closing brace was missing
+
+        const parser = createParser(onParse);
+
+        for await (const chunk of res.body as any) {
+          parser.feed(decoder.decode(chunk));
         }
-      };
-
-      const parser = createParser(onParse);
-
-      for await (const chunk of res.body as any) {
-        parser.feed(decoder.decode(chunk));
-      }
-    },
-  });
+      },
+    });
 
   return stream;
 };
