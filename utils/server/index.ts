@@ -89,29 +89,26 @@ export const OpenAIStream = async (
       const onParse = (event: ParsedEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           const data = event.data;
-          if (data !== '[DONE]') {
-            try {
-              const json = JSON.parse(data);
-              if (json.choices[0].finish_reason != null) {
-                controller.close();
-                return;
-              }
-              const text = json.choices[0].delta.content;
-              const queue = encoder.encode(text);
-              controller.enqueue(queue);
-            } catch (e) {
-              controller.error(e);
+
+          try {
+            const json = JSON.parse(data);
+            if (json.choices[0].finish_reason != null) {
+              controller.close();
+              return;
             }
+            const text = json.choices[0].delta.content;
+            const queue = encoder.encode(text);
+            controller.enqueue(queue);
+          } catch (e) {
+            controller.error(e);
           }
         }
       };
 
       const parser = createParser(onParse);
 
-      if (res.body) {
-        for await (const chunk of res.body) {
-          parser.feed(decoder.decode(chunk));
-        }
+      for await (const chunk of res.body as any) {
+        parser.feed(decoder.decode(chunk));
       }
     },
   });
